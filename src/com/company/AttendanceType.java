@@ -1,6 +1,6 @@
 package com.company;
 
-public enum ObecnoscType {
+public enum AttendanceType {
 
     OBECNY("obecny","o"),
     NIEOBECNY("nieobecny", "n");
@@ -8,7 +8,7 @@ public enum ObecnoscType {
     private String name;
     private String symbol;
 
-    ObecnoscType(String name,String symbol){
+    AttendanceType(String name, String symbol){
         this.name=name;
         this.symbol=symbol;
     }

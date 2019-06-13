@@ -6,12 +6,12 @@ import java.util.Map;
 
 public class Student {
 
-    Integer nrId;
-    String name;
+    private Integer nrId;
+    private String name;
 
-    Map<Date, Obecnosc> ewidencjaObecnosci;
+    Map<Date, Attendance> attendancesRekord;
 
-    Map<Integer, Ocena> ocenyStudenta;
+    Map<Integer, Mark> studentMarks;
 
     public void setNrId(Integer nrId) {
         this.nrId = nrId;
@@ -47,44 +47,48 @@ public class Student {
     }
 
     public Student() {
-        ocenyStudenta = new HashMap<>();
-        ewidencjaObecnosci = new HashMap<>();
+        studentMarks = new HashMap<>();
+        attendancesRekord = new HashMap<>();
     }
 
-    public Map<Date, Obecnosc> getEwidencjaObecnosci() {
-        return ewidencjaObecnosci;
+    public Map<Date, Attendance> getAttendancesRekord() {
+        return attendancesRekord;
     }
 
-    public Map<Integer, Ocena> getOcenyStudenta() {
-
-        return ocenyStudenta;
+    public void setAttendancesRekord(Map<Date, Attendance> attendancesRekord) {
+        this.attendancesRekord = attendancesRekord;
     }
 
-    public void setOcenyStudenta(Map<Integer, Ocena> ocenyStudenta) {
-
-        this.ocenyStudenta = ocenyStudenta;
+    public Map<Integer, Mark> getStudentMarks() {
+        return studentMarks;
     }
 
-    public Double policzSrednia(){
-        if(this.ocenyStudenta != null){
+    public void setStudentMarks(Map<Integer, Mark> studentMarks) {
+        this.studentMarks = studentMarks;
+    }
+
+    public Double calculateAverage(){
+        if(this.studentMarks != null){
             Double suma = 0.0;
-            for(Ocena o : ocenyStudenta.values()){
-                suma += o.getWartosc();
+            for(Mark o : studentMarks.values()){
+                suma += o.getValue();
             }
 
-            return suma/ ocenyStudenta.size();
+            return suma/studentMarks.size();
         }
         return 0.0;
     }
 
-    public int wyliczNieobecnosci(){
+    public int countAbsence(){
         int counter = 0;
-        if(ewidencjaObecnosci.isEmpty()) return counter;
+        if(attendancesRekord.isEmpty()) return counter;
 
-        for(Obecnosc o: ewidencjaObecnosci.values()){
-            if(o.getTypObecnosci().equals(ObecnoscType.NIEOBECNY)) counter++;
+        for(Attendance o: attendancesRekord.values()){
+            if(o.getTypeAttendance().equals(AttendanceType.NIEOBECNY)) counter++;
         }
 
         return  counter;
     }
+
+
 }

@@ -4,65 +4,65 @@ import java.util.*;
 
 public class Dziennik {
 
-    private static Map<Integer, Student> studenci = new HashMap<>();
+    private static Map<Integer, Student> students = new HashMap<>();
 
-    public static void dodajStudenta(Integer id, String imie, String nazwisko) throws IllegalArgumentException{
+    public static void addStudent(Integer id, String name, String surname) throws IllegalArgumentException{
         if(id == null )
-            id = wygenerujIdentyfikator(studenci);
+            id = generateIdentyfikator(students);
 
-        if(studenci.containsKey(id)){
+        if(students.containsKey(id)){
             throw new IllegalArgumentException("Student o takim identyfikatorze już istnieje");
         } else {
-            studenci.put (id, new Student(id, imie, nazwisko));
+            students.put (id, new Student(id, name, surname));
         }
     }
 
-    public static Map<Integer, Student> listaStudentow() {
-        return studenci;
+    public static Map<Integer, Student> listStudents() {
+        return students;
     }
 
-    public static Integer wygenerujIdentyfikator(Map mapa) throws IllegalArgumentException{
+    public static Integer generateIdentyfikator(Map mapa) throws IllegalArgumentException{
         if(mapa != null){
             return mapa.size() + 1;
         }
         throw new IllegalArgumentException("Nie można wygenerować identyfikatora");
     }
 
-    public static void usunStudenta(Integer id){
+    public static void removeStudent(Integer id){
         if(id == null) {
             throw new IllegalArgumentException();
         }
-        Student s = studenci.get(id);
+        Student s = students.get(id);
         if(s == null){
             throw new NoSuchElementException("Brak studenta o podanym identyfikatorze.");
         } else {
-            studenci.remove(id);
+            students.remove(id);
         }
     }
 
-    public static void zmienImieStudenta(Integer idStudent, String name) throws IllegalArgumentException{
-        if(!studenci.containsKey(idStudent) || name.length() < 3) throw new IllegalArgumentException("Niepoprawne dane studenta");
+    public static void replaceNameStudent(Integer idStudent, String name) throws IllegalArgumentException{
+        if(!students.containsKey(idStudent) || name.length() < 3) throw new IllegalArgumentException("Niepoprawne dane studenta");
 
-        studenci.get(idStudent).setName(name);
+        students.get(idStudent).setName(name);
     }
 
-    public static void zmienNazwiskoStudenta(Integer idStudent, String surname) throws IllegalArgumentException{
-        if(!studenci.containsKey(idStudent) || surname.length() < 3) throw new IllegalArgumentException("Niepoprawne dane studenta");
+    public static void replaceSurnameStudent(Integer idStudent, String surname) throws IllegalArgumentException{
+        if(!students.containsKey(idStudent) || surname.length() < 3) throw new IllegalArgumentException("Niepoprawne dane studenta");
 
-        studenci.get(idStudent).setSurname(surname);
+        students.get(idStudent).setSurname(surname);
     }
 
-    public static void sprawdzObecnosc(Integer idStudent, Date date, ObecnoscType obecnosc){
-        Student s = znajdzStudenta(idStudent);
+    public static void chceckAttendacne(Integer idStudent, Date date, AttendanceType attendance){
+        Student s = findStudent(idStudent);
 
-        if(date == null || obecnosc == null){
+        if(date == null || attendance == null){
             throw new IllegalArgumentException("Niepoprawne dane obecności");
         }
-        s.getEwidencjaObecnosci().put(date, new Obecnosc(obecnosc, date));
+        s.getAttendancesRekord().put(date, new Attendance(attendance, date));
     }
 
-    public static Student znajdzStudenta(Integer idstudent){
-        Student s = studenci.get(idstudent);
+    public static Student findStudent(Integer idstudent){
+        Student s = students.get(idstudent);
         if( s == null){
             throw new NoSuchElementException("Brak studenta o podanym identyfikatorze.");
         }
@@ -70,32 +70,60 @@ public class Dziennik {
         return s;
     }
 
-    public static void addGrade(Integer idStudent, double ocena, String przedmiot) throws NoSuchElementException {
-        if(!studenci.containsKey(idStudent)) throw new NoSuchElementException("Brak takiego studenta!");
-        if(Przedmiot.getByName(przedmiot) == null) throw new NoSuchElementException("Brak takiego przedmiotu!");
-        if(!czyOcenaPrawidlowa(ocena) )throw new IllegalArgumentException("Niepoprawna wartosc oceny");
+    public static void addMark(Integer idStudent, double mark, String subject) throws NoSuchElementException {
+        if(!students.containsKey(idStudent)) throw new NoSuchElementException("Brak takiego studenta!");
+        if(Subject.getByName(subject) == null) throw new NoSuchElementException("Brak takiego przedmiotu!");
+        if(!ifMarkTrue(mark) )throw new IllegalArgumentException("Niepoprawna wartosc oceny");
         else {
-            Map<Integer, Ocena> ocenyStudenta = studenci.get(idStudent).getOcenyStudenta();
-            Ocena nowaOcena = new Ocena(wygenerujIdentyfikator(ocenyStudenta), Przedmiot.getByName(przedmiot), ocena);
-            ocenyStudenta.put(idStudent, nowaOcena);
-            studenci.get(idStudent).setOcenyStudenta(ocenyStudenta);
-
+            Map<Integer, Mark> studentMarks = students.get(idStudent).getStudentMarks();
+            Mark newMark = new Mark(generateIdentyfikator(studentMarks), Subject.getByName(subject), mark);
+            studentMarks.put(idStudent, newMark);
+            students.get(idStudent).setStudentMarks(studentMarks);
         }
     }
 
-    public static boolean czyOcenaPrawidlowa(double ocena){
-        List<Double> poprawneOceny = new ArrayList<>();
-        poprawneOceny.add(2.0);
-        poprawneOceny.add(3.0);
-        poprawneOceny.add(3.5);
-        poprawneOceny.add(4.0);
-        poprawneOceny.add(4.5);
-        poprawneOceny.add(5.0);
+    public static void editMark(Integer idStudent, Integer idMark, double value) throws IllegalArgumentException {
+        if (idStudent == null || idMark == null) {
+            throw new IllegalArgumentException("Nieprawidłowy identyfikator studenta lub/i oceny!");
+        }
 
-        return poprawneOceny.contains(ocena);
+        Student s = findStudent(idStudent);
+        Mark m = s.getStudentMarks() != null ? s.getStudentMarks().get(idMark) : null;
 
+        if (s != null && m != null && ifMarkTrue(value)) {
+            students.get(idStudent).getStudentMarks().get(idMark).setValue(value);
+        } else {
+            throw new NoSuchElementException("Nie udało się zmienić oceny.");
+        }
     }
 
+    public static boolean ifMarkTrue(double mark){
+        List<Double> trueMark = new ArrayList<>();
+        trueMark.add(2.0);
+        trueMark.add(3.0);
+        trueMark.add(3.5);
+        trueMark.add(4.0);
+        trueMark.add(4.5);
+        trueMark.add(5.0);
+
+        return trueMark.contains(mark);
+    }
+
+    public static Double calculateAverageStudents() throws RuntimeException{
+        if(students == null || students.isEmpty()){
+            return 0.0;
+        }
+
+        Double countAverage = 0.0;
+        for(Student s : students.values()){
+            countAverage += s.calculateAverage();
+        }
+
+        Double average =  countAverage/students.size();
+        if(average.isNaN()) throw new RuntimeException("Nie można policzyć średniej - studenci nie mają ocen");
+        return average;
+
+    }
 
 
 
